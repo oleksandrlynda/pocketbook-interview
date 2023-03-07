@@ -3,6 +3,8 @@ SOURCES = main.cpp
 LIBS += -L../image/debug -limage
 TARGET = ../app-exe
 
+INCLUDEPATH += ../image
+
 QT += quick
 
 SOURCES += \
