@@ -1,7 +1,8 @@
 TEMPLATE = app
 SOURCES = main.cpp \
     controller.cpp \
-    filesmodel.cpp
+    filesmodel.cpp \
+    worker.cpp
 LIBS += -L../image/debug -limage
 TARGET = ../app-exe
 
@@ -27,4 +28,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     controller.h \
-    filesmodel.h
+    filesmodel.h \
+    worker.h

@@ -1,8 +1,10 @@
 #include "controller.h"
-#include "bmpimage.h"
+
 #include "filesmodel.h"
+#include "worker.h"
 
 #include <QSortFilterProxyModel>
+#include <QThread>
 
 Controller::Controller(QObject *parent)
     : QObject{parent}
@@ -44,16 +46,23 @@ void Controller::filter(const QString &suffix)
 
 void Controller::processFile(int index)
 {
+
+    const auto suffix = mModel->data(mModel->index(index), FilesModel::Suffix).toString();
     const auto fileName = mModel->data(mModel->index(index), FilesModel::Name).toString();
     const auto filePath = mPath + "\\" + fileName;
 
-    BmpImage image(filePath.toStdString());
-    if (!image.load())
-    {
-        emit errorOccured(QString::fromStdString(image.errorString()));
-    }
-    else
-    {
-        qDebug("Loaded");
-    }
+    Worker* worker = new Worker;
+    worker->setFileName(fileName);
+    worker->setFilePath(filePath);
+    worker->setSuffix(suffix);
+
+    QThread* thread = new QThread;
+    worker->moveToThread(thread);
+    connect(worker, &Worker::progress, mModel, &FilesModel::updateFileStateByName);
+    connect(worker, &Worker::error, this, &Controller::errorOccured);
+    connect(thread, &QThread::started, worker, &Worker::process);
+    connect(worker, &Worker::finished, thread, &QThread::quit);
+    connect(worker, &Worker::finished, worker, &Worker::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    thread->start();
 }

@@ -11,7 +11,8 @@ public:
     enum Roles {
         Name = Qt::UserRole,
         Size,
-        Suffix
+        Suffix,
+        State
     };
 
     FilesModel(QObject* parent = nullptr);
@@ -21,9 +22,11 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void setFolderPath(const QString& path);
+    void updateFileStateByName(const QString& name, const QString& state);
 
 private:
     QFileInfoList mList;
+    QVector<QString> mStates;
 };
 
 #endif // FILESMODEL_H

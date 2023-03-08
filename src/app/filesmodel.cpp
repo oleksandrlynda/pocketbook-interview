@@ -1,6 +1,7 @@
 #include "filesmodel.h"
 
 #include <QDir>
+#include <algorithm>
 
 FilesModel::FilesModel(QObject *parent)
 {
@@ -32,6 +33,8 @@ QVariant FilesModel::data(const QModelIndex &index, int role) const
         return fileInfo.size();
     case Suffix:
         return fileInfo.suffix();
+    case State:
+        return mStates[index.row()];
     default:
         return {};
     }
@@ -42,7 +45,8 @@ QHash<int, QByteArray> FilesModel::roleNames() const
     return {
         {Name, "name"},
         {Size, "size"},
-        {Suffix, "suffix"}
+        {Suffix, "suffix"},
+        {State, "state"}
     };
 }
 
@@ -51,5 +55,24 @@ void FilesModel::setFolderPath(const QString &path)
     beginResetModel();
     QDir dir(path);
     mList = dir.entryInfoList({"*.bmp", "*.png", "*.barch"});
+    mStates.clear();
+    mStates.resize(mList.count());
     endResetModel();
+}
+
+void FilesModel::updateFileStateByName(const QString &name, const QString &state)
+{
+    auto it = std::find_if(mList.begin(), mList.end(), [&name](const QFileInfo& info){
+        return name == info.fileName();
+    });
+
+    if (it != mList.end())
+    {
+        int fileIndex = it - mList.begin();
+        mStates[fileIndex] = state;
+
+        const auto fileModelIndex = index(fileIndex);
+        emit dataChanged(fileModelIndex, fileModelIndex);
+    }
+
 }
