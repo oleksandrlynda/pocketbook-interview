@@ -1,5 +1,7 @@
 TEMPLATE = app
-SOURCES = main.cpp
+SOURCES = main.cpp \
+    controller.cpp \
+    filesmodel.cpp
 LIBS += -L../image/debug -limage
 TARGET = ../app-exe
 
@@ -22,3 +24,7 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    controller.h \
+    filesmodel.h
