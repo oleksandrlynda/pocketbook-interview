@@ -28,6 +28,7 @@ public:
 
 protected:
     bool readHeader(std::ifstream& file);
+    void readPixels(std::ifstream& file);
 
 private:
     std::string mPath;

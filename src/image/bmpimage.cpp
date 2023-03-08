@@ -10,7 +10,7 @@ BmpImage::BmpImage(const std::string& path)
 
 bool BmpImage::load()
 {
-    std::ifstream stream(mPath, std::ios::binary /*| std::ios::in*/);
+    std::ifstream stream(mPath, std::ios::binary);
     if (!stream.is_open())
     {
         qDebug() << "Stream error:" << strerror(errno);
@@ -22,25 +22,8 @@ bool BmpImage::load()
     {
         return false;
     }
-
-    qDebug() << mHeader.offsetData << mHeader.headerSize;
     stream.seekg(mHeader.offsetData - 6);
-
-    for (int i = 0; i < mHeader.height; ++i)
-    {
-        for (int j = 0; j < mHeader.width; ++j)
-        {
-            uint8_t pixel;
-            stream.read(reinterpret_cast<char*>(&pixel), sizeof pixel);
-            mPixels.push_back(pixel);
-        }
-
-        int32_t padding = 0;
-        stream.read(reinterpret_cast<char*>(&padding), sizeof padding);
-    }
-    qDebug() << mHeader.width * mHeader.height;
-    qDebug() << mPixels.size();
-    qDebug() << Qt::hex << (uint8_t)mPixels[0];
+    readPixels(stream);
 
     return true;
 }
@@ -70,4 +53,20 @@ bool BmpImage::readHeader(std::ifstream& file)
     }
 
     return true;
+}
+
+void BmpImage::readPixels(std::ifstream &file)
+{
+    for (int i = 0; i < mHeader.height; ++i)
+    {
+        for (int j = 0; j < mHeader.width; ++j)
+        {
+            uint8_t pixel;
+            file.read(reinterpret_cast<char*>(&pixel), sizeof pixel);
+            mPixels.push_back(pixel);
+        }
+
+        int32_t padding = 0;
+        file.read(reinterpret_cast<char*>(&padding), sizeof padding);
+    }
 }
