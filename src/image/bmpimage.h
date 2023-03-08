@@ -33,7 +33,7 @@ private:
     std::string mPath;
     std::string mError;
     BitmapHeader mHeader;
-    std::vector<unsigned char> mPixels;
+    std::vector<uint8_t> mPixels;
 };
 
 #endif // BMPIMAGE_H

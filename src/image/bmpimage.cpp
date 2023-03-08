@@ -26,10 +26,20 @@ bool BmpImage::load()
     qDebug() << mHeader.offsetData << mHeader.headerSize;
     stream.seekg(mHeader.offsetData - 6);
 
-    mPixels = std::vector<uint8_t>(std::istreambuf_iterator<char>(stream),
-                                   std::istreambuf_iterator<char>()); // read by lines until mHeaderWidth seek padding
+    for (int i = 0; i < mHeader.height; ++i)
+    {
+        for (int j = 0; j < mHeader.width; ++j)
+        {
+            uint8_t pixel;
+            stream.read(reinterpret_cast<char*>(&pixel), sizeof pixel);
+            mPixels.push_back(pixel);
+        }
+
+        int32_t padding = 0;
+        stream.read(reinterpret_cast<char*>(&padding), sizeof padding);
+    }
     qDebug() << mHeader.width * mHeader.height;
-    qDebug() << mPixels.size(); // TODO: delete paddings
+    qDebug() << mPixels.size();
     qDebug() << Qt::hex << (uint8_t)mPixels[0];
 
     return true;
