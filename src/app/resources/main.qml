@@ -8,108 +8,135 @@ Window {
     width: 640
     height: 480
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("PocketBook")
 
-    ColumnLayout {
+    Item {
         anchors.fill: parent
-        Rectangle {
-            id: topBar
-            color: "lightgrey"
-            Layout.fillWidth: true
-            Layout.preferredHeight: 64
-
-            Text {
-                anchors.centerIn: parent
-                text: controller.imagesPath
-                font.bold: true
-            }
-        }
-
-        ListView {
-            id: filterView
-
-            Layout.rightMargin: 8
-            Layout.preferredHeight: 32
-            implicitWidth: contentWidth
-            Layout.alignment: Qt.AlignRight
-
-            orientation: ListView.Horizontal
-            spacing: 8
-
-            model: ListModel {
-                ListElement { filterName: "All" }
-                ListElement { filterName: "bmp" }
-                ListElement { filterName: "png" }
-                ListElement { filterName: "barch" }
-            }
-
-            delegate: Rectangle {
-                height: filterView.height
-                width: filterLabel.width + 16
-                color: "#d3d3d3"
-                border {
-                    width: 4
-                    color: filterView.currentIndex === index ? "#a3c3f3" : "#d3d3d3"
-                }
+        ColumnLayout {
+            anchors.fill: parent
+            Rectangle {
+                id: topBar
+                color: "lightgrey"
+                Layout.fillWidth: true
+                Layout.preferredHeight: 64
 
                 Text {
-                    id: filterLabel
                     anchors.centerIn: parent
-                    text: filterName
+                    text: controller.imagesPath
+                    font.bold: true
+                }
+            }
+
+            ListView {
+                id: filterView
+
+                Layout.rightMargin: 8
+                Layout.preferredHeight: 32
+                implicitWidth: contentWidth
+                Layout.alignment: Qt.AlignRight
+
+                orientation: ListView.Horizontal
+                spacing: 8
+
+                model: ListModel {
+                    ListElement { filterName: "All" }
+                    ListElement { filterName: "bmp" }
+                    ListElement { filterName: "png" }
+                    ListElement { filterName: "barch" }
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        filterView.currentIndex = index
-                        controller.filter(filterName)
+                delegate: Rectangle {
+                    height: filterView.height
+                    width: filterLabel.width + 16
+                    color: "#d3d3d3"
+                    border {
+                        width: 4
+                        color: filterView.currentIndex === index ? "#a3c3f3" : "#d3d3d3"
+                    }
+
+                    Text {
+                        id: filterLabel
+                        anchors.centerIn: parent
+                        text: filterName
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            filterView.currentIndex = index
+                            controller.filter(filterName)
+                        }
+                    }
+                }
+            }
+
+            ListView {
+                id: view
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.margins: 8
+                spacing: 8
+
+                clip: true
+                model: controller.model
+
+                delegate: Rectangle {
+                    width: view.width
+                    height: 32
+                    color: "#f3f3f3"
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 8
+
+                        Text {
+                            text: name
+                        }
+
+                        Item {
+                            Layout.alignment: Qt.AlignRight
+                            Layout.preferredWidth: 150
+                            Layout.fillHeight: true
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: suffix
+                            }
+
+                            Text {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: size
+                            }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            controller.processFile(index)
+                        }
+                        onDoubleClicked: { //temp
+                            dialog.error = "Some error Some error Some errorSome errorSome errorSome error Some error Some error"
+                            dialog.open()
+                        }
                     }
                 }
             }
         }
+    }
 
-        ListView {
-            id: view
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.margins: 8
-            spacing: 8
+    MessageDialog {
+        id: dialog
+    }
 
-            clip: true
-            model: controller.model
+    Connections {
+        target: controller
 
-            delegate: Rectangle {
-                width: view.width
-                height: 32
-                color: "#f3f3f3"
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 8
-
-                    Text {
-                        text: name
-                    }
-
-                    Item {
-                        Layout.alignment: Qt.AlignRight
-                        Layout.preferredWidth: 150
-                        Layout.fillHeight: true
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: suffix
-                        }
-
-                        Text {
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: size
-                        }
-                    }
-                }
-            }
+        function onErrorOccured(error) {
+            dialog.error = error
+            dialog.open()
         }
     }
 }

@@ -17,17 +17,6 @@ void Controller::init(const QString &path)
 {
     mPath = path;
     mModel->setFolderPath(mPath);
-
-    // temp
-    BmpImage image(mPath.toStdString() + "\\test-image-2-gs.bmp");
-    if (!image.load())
-    {
-        qDebug("Not loaded %s", image.errorString().data());
-    }
-    else
-    {
-        qDebug("Loaded");
-    }
 }
 
 QString Controller::imagesPath() const
@@ -51,4 +40,20 @@ void Controller::filter(const QString &suffix)
         mFilterModel->setFilterFixedString(suffix);
     }
     mFilterModel->invalidate();
+}
+
+void Controller::processFile(int index)
+{
+    const auto fileName = mModel->data(mModel->index(index), FilesModel::Name).toString();
+    const auto filePath = mPath + "\\" + fileName;
+
+    BmpImage image(filePath.toStdString());
+    if (!image.load())
+    {
+        emit errorOccured(QString::fromStdString(image.errorString()));
+    }
+    else
+    {
+        qDebug("Loaded");
+    }
 }

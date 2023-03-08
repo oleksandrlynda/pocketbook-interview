@@ -20,6 +20,10 @@ public:
     QAbstractItemModel* model() const;
 
     Q_INVOKABLE void filter(const QString& suffix);
+    Q_INVOKABLE void processFile(int index);
+
+signals:
+    void errorOccured(const QString& error);
 
 private:
     QString mPath;
