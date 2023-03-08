@@ -14,11 +14,14 @@ Window {
 
     Item {
         anchors.fill: parent
+
         ColumnLayout {
             anchors.fill: parent
+            spacing: 8
+
             Rectangle {
                 id: topBar
-                color: "lightgrey"
+                color: "#d3d3d3"
                 Layout.fillWidth: true
                 Layout.preferredHeight: 64
 
@@ -76,7 +79,8 @@ Window {
                 id: view
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.margins: 8
+                Layout.rightMargin: 8
+                Layout.leftMargin: 8
                 spacing: 8
 
                 clip: true
