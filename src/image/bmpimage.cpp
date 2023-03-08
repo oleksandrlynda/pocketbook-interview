@@ -14,7 +14,7 @@ bool BmpImage::load()
     if (!stream.is_open())
     {
         qDebug() << "Stream error:" << strerror(errno);
-        mError = "Cannot open file: " + mPath;
+        mError = "Cannot open file.";
         return false;
     }
 

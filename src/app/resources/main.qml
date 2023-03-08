@@ -7,6 +7,8 @@ import QtQuick.Layouts
 Window {
     width: 640
     height: 480
+    minimumWidth: 640
+    minimumHeight: 480
     visible: true
     title: qsTr("PocketBook")
 
@@ -95,7 +97,7 @@ Window {
 
                         Item {
                             Layout.alignment: Qt.AlignRight
-                            Layout.preferredWidth: 150
+                            Layout.preferredWidth: 200
                             Layout.fillHeight: true
 
                             Text {
@@ -112,14 +114,22 @@ Window {
                         }
                     }
 
+                    Rectangle {
+                        width: stateText.width + 8
+                        height: stateText.height + 8
+                        anchors.centerIn: parent
+                        visible: stateText.text.length > 0
+                        Text {
+                            id: stateText
+                            anchors.centerIn: parent
+                            text: progressState
+                        }
+                    }
+
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
                             controller.processFile(index)
-                        }
-                        onDoubleClicked: { //temp
-                            dialog.error = "Some error Some error Some errorSome errorSome errorSome error Some error Some error"
-                            dialog.open()
                         }
                     }
                 }

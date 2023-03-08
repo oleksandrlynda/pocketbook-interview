@@ -17,20 +17,16 @@ void Worker::process()
     if (mSuffix.contains("bmp", Qt::CaseInsensitive))
     {
         emit progress(mFileName, "Encoding bmp");
+        convertBmpToBarch();
     }
     else if (mSuffix.contains("barch", Qt::CaseInsensitive))
     {
         emit progress(mFileName, "Decoding barch");
-    }
-
-    BmpImage image(mFilePath.toStdString());
-    if (!image.load())
-    {
-        emit error(QString::fromStdString(image.errorString()));
+        convertBarchToBmp();
     }
     else
     {
-        qDebug("Loaded");
+        emit error(mFileName + ": Unsupported format");
     }
 
     emit progress(mFileName, {});
@@ -50,4 +46,19 @@ void Worker::setFilePath(const QString &newFilePath)
 void Worker::setFileName(const QString &newFileName)
 {
     mFileName = newFileName;
+}
+
+void Worker::convertBmpToBarch()
+{
+    BmpImage image(mFilePath.toStdString());
+    if (!image.load())
+    {
+        emit error(mFileName + ": " + QString::fromStdString(image.errorString()));
+        return;
+    }
+}
+
+void Worker::convertBarchToBmp()
+{
+
 }

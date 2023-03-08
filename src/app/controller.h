@@ -22,6 +22,9 @@ public:
     Q_INVOKABLE void filter(const QString& suffix);
     Q_INVOKABLE void processFile(int index);
 
+private:
+    void updateModel();
+
 signals:
     void errorOccured(const QString& error);
 

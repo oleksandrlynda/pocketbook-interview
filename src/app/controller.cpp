@@ -18,7 +18,7 @@ Controller::Controller(QObject *parent)
 void Controller::init(const QString &path)
 {
     mPath = path;
-    mModel->setFolderPath(mPath);
+    updateModel();
 }
 
 QString Controller::imagesPath() const
@@ -47,8 +47,9 @@ void Controller::filter(const QString &suffix)
 void Controller::processFile(int index)
 {
 
-    const auto suffix = mModel->data(mModel->index(index), FilesModel::Suffix).toString();
-    const auto fileName = mModel->data(mModel->index(index), FilesModel::Name).toString();
+    const auto sourceIndex = mFilterModel->mapToSource(mFilterModel->index(index, 0));
+    const auto suffix = mModel->data(sourceIndex, FilesModel::Suffix).toString();
+    const auto fileName = mModel->data(sourceIndex, FilesModel::Name).toString();
     const auto filePath = mPath + "\\" + fileName;
 
     Worker* worker = new Worker;
@@ -64,5 +65,11 @@ void Controller::processFile(int index)
     connect(worker, &Worker::finished, thread, &QThread::quit);
     connect(worker, &Worker::finished, worker, &Worker::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    connect(thread, &QThread::finished, this, &Controller::updateModel);
     thread->start();
+}
+
+void Controller::updateModel()
+{
+    mModel->setFolderPath(mPath);
 }

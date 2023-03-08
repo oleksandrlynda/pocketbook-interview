@@ -46,7 +46,7 @@ QHash<int, QByteArray> FilesModel::roleNames() const
         {Name, "name"},
         {Size, "size"},
         {Suffix, "suffix"},
-        {State, "state"}
+        {State, "progressState"}
     };
 }
 
