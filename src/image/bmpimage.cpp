@@ -3,6 +3,11 @@
 #include <fstream>
 #include <iostream>
 
+BmpImage::BmpImage()
+{
+
+}
+
 BmpImage::BmpImage(const std::string& path)
     : mPath{path}
 {}
@@ -130,4 +135,14 @@ int BmpImage::paddingSize() const
 {
     const auto pixelsRowWithPaddings = (mHeader.width + 3) / 4 * 4;
     return  pixelsRowWithPaddings - mHeader.width;
+}
+
+std::vector<uint8_t> BmpImage::data() const
+{
+    return mData;
+}
+
+BitmapHeader BmpImage::header() const
+{
+    return mHeader;
 }

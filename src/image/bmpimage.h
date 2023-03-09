@@ -22,12 +22,17 @@ struct BitmapHeader
 class BmpImage
 {
 public:
-    BmpImage(const std::string& path);
+    BmpImage();
+    explicit BmpImage(const std::string& path);
 
     bool load();
     bool save(const std::string& path);
 
     std::string errorString() const;
+
+    BitmapHeader header() const;
+
+    std::vector<uint8_t> data() const;
 
 protected:
     bool readHeader(std::ifstream& file);
@@ -36,9 +41,9 @@ protected:
     void writeHeader(std::ofstream& stream);
     bool writePixels(std::ofstream& stream);
 
-    int paddingSize() const;
+    virtual int paddingSize() const;
 
-private:
+protected:
     std::string mPath;
     std::string mError;
     BitmapHeader mHeader;

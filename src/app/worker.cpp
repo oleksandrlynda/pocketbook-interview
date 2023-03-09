@@ -1,4 +1,5 @@
 #include "worker.h"
+#include "barchimage.h"
 #include "bmpimage.h"
 
 #include <QFileInfo>
@@ -59,12 +60,13 @@ void Worker::convertBmpToBarch()
         return;
     }
 
-    // temp bmp to bmp
     QFileInfo info(mFilePath);
-    const auto newFileName = info.baseName() + "_packed.bmp";
+    const auto newFileName = info.baseName() + "_packed.barch";
     const auto newImagePath = info.absolutePath() + "/" + newFileName;
-    qDebug(qPrintable(newImagePath));
-    if (!image.save(newImagePath.toStdString()))
+
+    BarchImage convertedImage;
+    convertedImage.fromBmp(image);
+    if (!convertedImage.save(newImagePath.toStdString()))
     {
         emit error(newFileName + ": " + QString::fromStdString(image.errorString()));
         return;
@@ -73,5 +75,21 @@ void Worker::convertBmpToBarch()
 
 void Worker::convertBarchToBmp()
 {
+    BarchImage image(mFilePath.toStdString());
+    if (!image.load())
+    {
+        emit error(mFileName + ": " + QString::fromStdString(image.errorString()));
+        return;
+    }
 
+    QFileInfo info(mFilePath);
+    const auto newFileName = info.baseName() + "_unpacked.bmp";
+    const auto newImagePath = info.absolutePath() + "/" + newFileName;
+
+    BmpImage convertedImage = image.toBmp();
+    if (!convertedImage.save(newImagePath.toStdString()))
+    {
+        emit error(newFileName + ": " + QString::fromStdString(image.errorString()));
+        return;
+    }
 }
