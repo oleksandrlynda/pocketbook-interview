@@ -41,6 +41,7 @@ void BarchImage::fromBmp(const BmpImage &bmp)
 {
     mHeader = bmp.header();
     const auto bmpData = bmp.data();
+    mData.clear();
 
     std::vector<uint8_t> emptyRows;
     emptyRows.resize(mHeader.height);
@@ -78,7 +79,6 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                         compressedChunk.push_back(COLOR_PIXEL_TAG);
                         compressedChunk.push_back(firstPixel);
                     }
-                    j+=3;
                 }
                 else
                 {
@@ -88,6 +88,7 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                     compressedChunk.push_back(thirdPixel);
                     compressedChunk.push_back(fourthPixel);
                 }
+                j+=3;
             }
             else
             {
@@ -118,7 +119,9 @@ void BarchImage::fromBmp(const BmpImage &bmp)
     qDebug() << "Skipped "<< emptyRowsCount << ", with size: " << emptyRowsCount * mHeader.width;
 
     mData.reserve(emptyRows.size() + compressedData.size());
-    mData.insert(mData.begin(), emptyRows.begin(), emptyRows.end());
+//    mData.push_back(0xaa); // TODO: remove padding
+    mData.insert(mData.end(), emptyRows.begin(), emptyRows.end());
+//    mData.push_back(0xbb); // TODO: remove padding
     mData.insert(mData.end(), compressedData.begin(), compressedData.end());
 }
 
