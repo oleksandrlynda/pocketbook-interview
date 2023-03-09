@@ -194,7 +194,11 @@ void BarchImage::readPixels(std::ifstream &stream)
 
 bool BarchImage::writePixels(std::ofstream &stream)
 {
+//    char pad = 0xaa;
+//    stream.write(&pad, 1);
     stream.write(reinterpret_cast<char*>(mEmptyRows.data()), mEmptyRows.size());
+//    pad = 0xbb;
+//    stream.write(&pad, 1);
     stream.write(reinterpret_cast<char*>(mData.data()), mData.size());
     return true;
 }

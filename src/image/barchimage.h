@@ -5,6 +5,12 @@
 
 #include "bmpimage.h"
 
+/* TODO:
+ * 1. use bitset for empty rows
+ * 2. write mData pixels as bits not bites
+ *
+ */
+
 class BarchImage : public BmpImage
 {
 public:
@@ -20,7 +26,7 @@ protected:
     int paddingSize() const override;
 
 private:
-    std::vector<uint8_t> mEmptyRows;
+    std::vector<uint8_t> mEmptyRows; // bitset instead of vector, serialize ulong
 };
 
 #endif // BARCHIMAGE_H
