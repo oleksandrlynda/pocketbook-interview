@@ -8,6 +8,13 @@ BmpImage::BmpImage()
 
 }
 
+BmpImage::BmpImage(BitmapHeader &&header, std::vector<uint8_t> &&data)
+    : mHeader {std::move(header)}
+    , mData {std::move(data)}
+{
+
+}
+
 BmpImage::BmpImage(const std::string& path)
     : mPath{path}
 {}
@@ -71,7 +78,6 @@ bool BmpImage::readHeader(std::ifstream& file)
         mHeader.unusedBytes.push_back(unusedByte);
     }
 
-
     return true;
 }
 void BmpImage::readPixels(std::ifstream &file)
@@ -121,11 +127,14 @@ bool BmpImage::writePixels(std::ofstream &stream)
         uint32_t padding = 0;
         stream.write(reinterpret_cast<char*>(&padding), paddingSize());
     }
-    stream.close();
-
-    if (validationCounter != mData.size())
+    if (validationCounter > mData.size())
     {
-        mError = "Image is saved incorrectly";
+        mError = "Image is saved incorrectly. Extra bytes: " + std::to_string(mData.size() - validationCounter);
+        return false;
+    }
+    else if (validationCounter < mData.size())
+    {
+        mError = "Image is saved incorrectly. Missed bytes: " + std::to_string(mData.size() - validationCounter);
         return false;
     }
 

@@ -68,7 +68,7 @@ void Worker::convertBmpToBarch()
     convertedImage.fromBmp(image);
     if (!convertedImage.save(newImagePath.toStdString()))
     {
-        emit error(newFileName + ": " + QString::fromStdString(image.errorString()));
+        emit error(newFileName + ": " + QString::fromStdString(convertedImage.errorString()));
         return;
     }
 }
@@ -89,7 +89,7 @@ void Worker::convertBarchToBmp()
     BmpImage convertedImage = image.toBmp();
     if (!convertedImage.save(newImagePath.toStdString()))
     {
-        emit error(newFileName + ": " + QString::fromStdString(image.errorString()));
+        emit error(newFileName + ": " + QString::fromStdString(convertedImage.errorString()));
         return;
     }
 }

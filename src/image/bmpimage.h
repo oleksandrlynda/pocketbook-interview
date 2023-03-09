@@ -23,6 +23,7 @@ class BmpImage
 {
 public:
     BmpImage();
+    BmpImage(BitmapHeader&& header, std::vector<uint8_t>&& data);
     explicit BmpImage(const std::string& path);
 
     bool load();

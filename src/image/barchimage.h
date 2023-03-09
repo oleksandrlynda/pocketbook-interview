@@ -15,9 +15,12 @@ public:
     void fromBmp(const BmpImage& bmp);
 
 protected:
-    void readPixels(std::ifstream &stream);
-    bool writePixels(std::ofstream &stream);
-    int paddingSize() const;
+    void readPixels(std::ifstream &stream) override;
+    bool writePixels(std::ofstream &stream) override;
+    int paddingSize() const override;
+
+private:
+    std::vector<uint8_t> mEmptyRows;
 };
 
 #endif // BARCHIMAGE_H
