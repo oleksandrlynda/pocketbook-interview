@@ -76,6 +76,7 @@ bool BmpImage::readHeader(std::ifstream& file)
 }
 void BmpImage::readPixels(std::ifstream &file)
 {
+    mData.reserve(mHeader.width * mHeader.height);
     for (int i = 0; i < mHeader.height; ++i)
     {
         for (int j = 0; j < mHeader.width; ++j)

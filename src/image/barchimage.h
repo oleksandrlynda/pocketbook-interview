@@ -15,10 +15,9 @@ public:
     void fromBmp(const BmpImage& bmp);
 
 protected:
+    void readPixels(std::ifstream &stream);
+    bool writePixels(std::ofstream &stream);
     int paddingSize() const;
-
-private:
-    std::vector<int> emptyRows;
 };
 
 #endif // BARCHIMAGE_H

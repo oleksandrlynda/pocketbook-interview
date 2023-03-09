@@ -36,10 +36,10 @@ public:
 
 protected:
     bool readHeader(std::ifstream& file);
-    void readPixels(std::ifstream& file);
+    virtual void readPixels(std::ifstream& file);
 
     void writeHeader(std::ofstream& stream);
-    bool writePixels(std::ofstream& stream);
+    virtual bool writePixels(std::ofstream& stream);
 
     virtual int paddingSize() const;
 
