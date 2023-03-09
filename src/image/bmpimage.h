@@ -16,6 +16,7 @@ struct BitmapHeader
     int32_t height{}; // Height of the image (pixels)
     uint16_t planes{}; // Number of color planes, always 1
     uint16_t bitsPerPixel{}; // Number of bits per pixel
+    std::vector<char> unusedBytes;
 };
 
 class BmpImage
@@ -24,17 +25,24 @@ public:
     BmpImage(const std::string& path);
 
     bool load();
+    bool save(const std::string& path);
+
     std::string errorString() const;
 
 protected:
     bool readHeader(std::ifstream& file);
     void readPixels(std::ifstream& file);
 
+    void writeHeader(std::ofstream& stream);
+    bool writePixels(std::ofstream& stream);
+
+    int paddingSize() const;
+
 private:
     std::string mPath;
     std::string mError;
     BitmapHeader mHeader;
-    std::vector<uint8_t> mPixels;
+    std::vector<uint8_t> mData;
 };
 
 #endif // BMPIMAGE_H

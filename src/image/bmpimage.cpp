@@ -1,8 +1,7 @@
 #include "bmpimage.h"
 
 #include <fstream>
-
-#include <QDebug>
+#include <iostream>
 
 BmpImage::BmpImage(const std::string& path)
     : mPath{path}
@@ -13,7 +12,7 @@ bool BmpImage::load()
     std::ifstream stream(mPath, std::ios::binary);
     if (!stream.is_open())
     {
-        qDebug() << "Stream error:" << strerror(errno);
+        std::cout << "Stream error: " << strerror(errno) << std::endl;
         mError = "Cannot open file.";
         return false;
     }
@@ -22,10 +21,18 @@ bool BmpImage::load()
     {
         return false;
     }
-    stream.seekg(mHeader.offsetData - 6);
+    stream.seekg(mHeader.offsetData);
     readPixels(stream);
 
     return true;
+}
+
+bool BmpImage::save(const std::string& path)
+{
+    std::ofstream stream(path, std::ios::binary);
+
+    writeHeader(stream);
+    return writePixels(stream);
 }
 
 std::string BmpImage::errorString() const
@@ -52,9 +59,16 @@ bool BmpImage::readHeader(std::ifstream& file)
         return false;
     }
 
+    int8_t unusedByte;
+    while (file.tellg() != mHeader.offsetData)
+    {
+        file.read(reinterpret_cast<char*>(&unusedByte), sizeof unusedByte);
+        mHeader.unusedBytes.push_back(unusedByte);
+    }
+
+
     return true;
 }
-
 void BmpImage::readPixels(std::ifstream &file)
 {
     for (int i = 0; i < mHeader.height; ++i)
@@ -63,10 +77,57 @@ void BmpImage::readPixels(std::ifstream &file)
         {
             uint8_t pixel;
             file.read(reinterpret_cast<char*>(&pixel), sizeof pixel);
-            mPixels.push_back(pixel);
+            mData.push_back(pixel);
         }
 
         int32_t padding = 0;
-        file.read(reinterpret_cast<char*>(&padding), sizeof padding);
+        file.read(reinterpret_cast<char*>(&padding), paddingSize());
     }
+}
+
+void BmpImage::writeHeader(std::ofstream &stream)
+{
+    stream.write(reinterpret_cast<char*>(&mHeader.fileType), sizeof mHeader.fileType);
+    stream.write(reinterpret_cast<char*>(&mHeader.fileSize), sizeof mHeader.fileSize);
+    stream.write(reinterpret_cast<char*>(&mHeader.reserved1), sizeof mHeader.reserved1);
+    stream.write(reinterpret_cast<char*>(&mHeader.reserved2), sizeof mHeader.reserved2);
+    stream.write(reinterpret_cast<char*>(&mHeader.offsetData), sizeof mHeader.offsetData);
+    stream.write(reinterpret_cast<char*>(&mHeader.headerSize), sizeof mHeader.headerSize);
+    stream.write(reinterpret_cast<char*>(&mHeader.width), sizeof mHeader.width);
+    stream.write(reinterpret_cast<char*>(&mHeader.height), sizeof mHeader.height);
+    stream.write(reinterpret_cast<char*>(&mHeader.planes), sizeof mHeader.planes);
+    stream.write(reinterpret_cast<char*>(&mHeader.bitsPerPixel), sizeof mHeader.bitsPerPixel);
+
+    stream.write(mHeader.unusedBytes.data(), mHeader.unusedBytes.size());
+}
+
+bool BmpImage::writePixels(std::ofstream &stream)
+{
+    int validationCounter = 0;
+    for (int i = 0; i < mHeader.height; ++i)
+    {
+        for (int j = 0; j < mHeader.width; ++j)
+        {
+            stream.write(reinterpret_cast<char*>(&mData[i * mHeader.width + j]), sizeof(uint8_t));
+            validationCounter++;
+        }
+
+        uint32_t padding = 0;
+        stream.write(reinterpret_cast<char*>(&padding), paddingSize());
+    }
+    stream.close();
+
+    if (validationCounter != mData.size())
+    {
+        mError = "Image is saved incorrectly";
+        return false;
+    }
+
+    return true;
+}
+
+int BmpImage::paddingSize() const
+{
+    const auto pixelsRowWithPaddings = (mHeader.width + 3) / 4 * 4;
+    return  pixelsRowWithPaddings - mHeader.width;
 }
