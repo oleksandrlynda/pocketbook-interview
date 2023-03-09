@@ -53,13 +53,21 @@ BmpImage BarchImage::toBmp()
                     index+=4;
                     bmpData.insert(bmpData.end(), 4, BLACK_PIXEL);
                 }
-                else if (*iter == COLOR_PIXEL_TAG)
+                else if (*iter == COLOR_PIXEL_TAG) // all other colors should be tagged with it
                 {
-                    index+=4;
-                    iter = std::next(iter);
-                    bmpData.insert(bmpData.end(), 4, *iter);
+                    int shift = 4;
+                    if ((index + shift) > mHeader.width)
+                    {
+                        shift = mHeader.width - index;
+                    }
+                    for (int i = 0; i < shift; ++i)
+                    {
+                        iter = std::next(iter);
+                        bmpData.push_back(*iter);
+                        index+=1;
+                    }
                 }
-                else
+                else // TODO: don't need this else
                 {
                     ++index;
                     bmpData.push_back(*iter);
@@ -68,6 +76,10 @@ BmpImage BarchImage::toBmp()
                 if (iter != mData.end())
                 {
                     iter = std::next(iter);
+                }
+                else
+                {
+                    break;
                 }
             }
         }
@@ -116,11 +128,15 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                         whiteRow = false;
                         compressedChunk.push_back(COLOR_PIXEL_TAG);
                         compressedChunk.push_back(firstPixel);
+                        compressedChunk.push_back(firstPixel);
+                        compressedChunk.push_back(firstPixel);
+                        compressedChunk.push_back(firstPixel);
                     }
                 }
                 else
                 {
                     whiteRow = false;
+                    compressedChunk.push_back(COLOR_PIXEL_TAG);
                     compressedChunk.push_back(firstPixel);
                     compressedChunk.push_back(secondPixel);
                     compressedChunk.push_back(thirdPixel);
@@ -130,12 +146,18 @@ void BarchImage::fromBmp(const BmpImage &bmp)
             }
             else
             {
-                const auto pixel = bmpData[i * mHeader.width + j];
-                if (pixel != WHITE_PIXEL)
+                compressedChunk.push_back(COLOR_PIXEL_TAG);
+                int shift = mHeader.width - j;
+                for (int h = 0; h < shift; ++h)
                 {
-                    whiteRow = false;
+                    const auto pixel = bmpData[i * mHeader.width + j + h];
+                    if (pixel != WHITE_PIXEL)
+                    {
+                        whiteRow = false;
+                    }
+                    compressedChunk.push_back(pixel);
                 }
-                compressedChunk.push_back(pixel);
+                j+=shift-1;
             }
         }
 

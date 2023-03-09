@@ -129,12 +129,12 @@ bool BmpImage::writePixels(std::ofstream &stream)
     }
     if (validationCounter > mData.size())
     {
-        mError = "Image is saved incorrectly. Extra bytes: " + std::to_string(mData.size() - validationCounter);
+        mError = "Image is saved incorrectly. Missed bytes: " + std::to_string(mData.size() - validationCounter);
         return false;
     }
     else if (validationCounter < mData.size())
     {
-        mError = "Image is saved incorrectly. Missed bytes: " + std::to_string(mData.size() - validationCounter);
+        mError = "Image is saved incorrectly. Extra bytes: " + std::to_string(mData.size() - validationCounter);
         return false;
     }
 
