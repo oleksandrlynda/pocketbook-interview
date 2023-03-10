@@ -97,9 +97,7 @@ void BarchImage::fromBmp(const BmpImage &bmp)
     mEmptyRows.clear();
     mEmptyRows.resize(mHeader.height);
 
-    std::vector<uint8_t> compressedChunk;
-    compressedChunk.reserve(mHeader.width);
-
+    BarchData barchData;
     for (int i = 0; i < mHeader.height; ++i)
     {
         bool whiteRow = true;
@@ -116,37 +114,28 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                 {
                     if (firstPixel == WHITE_PIXEL)
                     {
-                        compressedChunk.push_back(WHITE_PIXEL_TAG);
+                        barchData.setData(WHITE_PIXEL_TAG, Tag);
                     }
                     else if (firstPixel == BLACK_PIXEL)
                     {
                         whiteRow = false;
-                        compressedChunk.push_back(BLACK_PIXEL_TAG);
-                    }
-                    else
-                    {
-                        whiteRow = false;
-                        compressedChunk.push_back(COLOR_PIXEL_TAG);
-                        compressedChunk.push_back(firstPixel);
-                        compressedChunk.push_back(firstPixel);
-                        compressedChunk.push_back(firstPixel);
-                        compressedChunk.push_back(firstPixel);
+                        barchData.setData(BLACK_PIXEL_TAG, Tag);
                     }
                 }
                 else
                 {
                     whiteRow = false;
-                    compressedChunk.push_back(COLOR_PIXEL_TAG);
-                    compressedChunk.push_back(firstPixel);
-                    compressedChunk.push_back(secondPixel);
-                    compressedChunk.push_back(thirdPixel);
-                    compressedChunk.push_back(fourthPixel);
+                    barchData.setData(COLOR_PIXEL_TAG, Tag);
+                    barchData.setData(firstPixel);
+                    barchData.setData(secondPixel);
+                    barchData.setData(thirdPixel);
+                    barchData.setData(fourthPixel);
                 }
                 j+=3;
             }
             else
             {
-                compressedChunk.push_back(COLOR_PIXEL_TAG);
+                barchData.setData(COLOR_PIXEL_TAG, Tag);
                 int shift = mHeader.width - j;
                 for (int h = 0; h < shift; ++h)
                 {
@@ -155,21 +144,27 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                     {
                         whiteRow = false;
                     }
-                    compressedChunk.push_back(pixel);
+                    barchData.setData(pixel);
                 }
-                j+=shift-1;
+                j += shift - 1;
+
+                // Padding
+                for (int i = shift - 1; i < 4; ++i)
+                {
+                    barchData.setData(0);
+                }
             }
         }
 
         if (whiteRow)
         {
             mEmptyRows[i] = WHITE_ROW_FLAG;
-            compressedChunk.clear();
+            barchData.vector.clear();
         }
         else
         {
-            mData.insert(mData.end(), compressedChunk.begin(), compressedChunk.end());
-            compressedChunk.clear();
+            mData.insert(mData.end(), barchData.vector.begin(), barchData.vector.end());
+            barchData.vector.clear();
         }
     }
 
@@ -206,4 +201,16 @@ bool BarchImage::writePixels(std::ofstream &stream)
 int BarchImage::paddingSize() const
 {
     return 0;
+}
+
+void BarchData::setData(uint8_t byte, DataType type)
+{
+    if (type == Tag)
+    {
+        // optimized push
+    }
+    else
+    {
+        // color push
+    }
 }

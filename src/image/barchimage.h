@@ -7,9 +7,18 @@
 
 /* TODO:
  * 1. use bitset for empty rows
- * 2. write mData pixels as bits not bites
+ * 2. write mData pixels as bits not bytes
  *
  */
+
+enum DataType { Tag, Pixel };
+
+struct BarchData
+{
+    void setData(uint8_t byte, DataType type = Pixel);
+
+    std::vector<bool> vector;
+};
 
 class BarchImage : public BmpImage
 {
@@ -26,6 +35,7 @@ protected:
     int paddingSize() const override;
 
 private:
+    std::vector<bool> mBinaryData;
     std::vector<uint8_t> mEmptyRows; // bitset instead of vector, serialize ulong
 };
 
