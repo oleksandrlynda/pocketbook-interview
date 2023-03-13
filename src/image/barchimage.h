@@ -13,9 +13,15 @@
 
 enum DataType { Tag, Pixel };
 
+
+/* TODO:
+ * Maybe use vector<uint_8> and add next method that will add more uint8_t if needed.
+ * or next method should point on bit in the array and add more uint8_t if needed.
+ */
 struct BarchData
 {
     void setData(uint8_t byte, DataType type = Pixel);
+    void addPadding();
 
     std::vector<bool> vector;
 };

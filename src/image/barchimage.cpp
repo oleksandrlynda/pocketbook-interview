@@ -5,9 +5,9 @@
 
 #include <QDebug>
 
-#define WHITE_PIXEL_TAG 0
-#define BLACK_PIXEL_TAG 10
-#define COLOR_PIXEL_TAG 11
+#define WHITE_PIXEL_TAG 0b0
+#define BLACK_PIXEL_TAG 0b10
+#define COLOR_PIXEL_TAG 0b11
 
 #define WHITE_PIXEL 0xFF
 #define BLACK_PIXEL 0
@@ -147,12 +147,6 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                     barchData.setData(pixel);
                 }
                 j += shift - 1;
-
-                // Padding
-                for (int i = shift - 1; i < 4; ++i)
-                {
-                    barchData.setData(0);
-                }
             }
         }
 
@@ -205,12 +199,34 @@ int BarchImage::paddingSize() const
 
 void BarchData::setData(uint8_t byte, DataType type)
 {
+    // compress tag
+    int shift = 0;
     if (type == Tag)
     {
-        // optimized push
+        while((byte & 0b10000000) == 0)
+        {
+            if (shift == 7)
+            {
+                break;
+            }
+
+            shift++;
+            byte <<= 1;
+        }
     }
-    else
+
+    // data push per bit
+    for (int i  = 0; i < (8 - shift); ++i, byte <<= 1)
     {
-        // color push
+        vector.push_back(byte & 0b10000000);
+    }
+}
+
+void BarchData::addPadding()
+{
+    const auto padding = 8 - vector.size() % 8;
+    for (int i = 0; i < padding; ++i)
+    {
+        vector.push_back(0);
     }
 }
