@@ -1,4 +1,5 @@
 [![Release budge](https://img.shields.io/badge/Release-v1.0-green)](https://github.com/oleksandrlynda/pocketbook-interview/releases/latest)
+[![Binary budge](https://img.shields.io/badge/Binary-Win--x64-orange)](https://github.com/octo-org/octo-repo/releases/latest/download/win-release.zip)
 
 # pocketbook-interview
 Task for interview
