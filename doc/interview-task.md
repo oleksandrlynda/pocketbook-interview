@@ -1,8 +1,5 @@
 ## 0. TODO
- - default image folder
  - qmldir
- - deploy
- - relase binary
 
 ## 1.  Библиотека сжатия изображений. 
 
