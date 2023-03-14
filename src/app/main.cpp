@@ -10,17 +10,17 @@
 #include "barchimage.h"
 void test()
 {
-    BarchData data;
-    data.setData(0, DataType::Tag);
-    data.setData(2, DataType::Tag);
-    data.setData(3, DataType::Tag);
+    BinaryData data;
+    data.setData(0, DataType::Compressed);
+    data.setData(2, DataType::Compressed);
+    data.setData(3, DataType::Compressed);
     data.setData(0x01);
     data.setData(0x01);
     data.setData(0x01);
     data.setData(0x01);
 
     QString str;
-    BarchBitIterator iter(data);
+    BinaryBitIterator iter(data);
     while (true)
     {
         str += iter.getBit() ? "1" : "0";

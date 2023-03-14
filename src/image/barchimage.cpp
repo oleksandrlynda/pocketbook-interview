@@ -13,6 +13,7 @@
 #define BLACK_PIXEL 0
 
 #define WHITE_ROW_FLAG 1
+#define NOT_WHITE_ROW_FLAG 0
 
 BarchImage::BarchImage()
     : BmpImage()
@@ -32,58 +33,58 @@ BmpImage BarchImage::toBmp()
     bmpData.reserve(mHeader.width * mHeader.height);
 
     auto iter = mData.begin();
-    for (int row = 0; row < mEmptyRows.size(); ++row)
-    {
-        if (mEmptyRows[row] == WHITE_ROW_FLAG)
-        {
-            bmpData.insert(bmpData.end(), mHeader.width, WHITE_PIXEL);
-        }
-        else
-        {
-            int index = 0;
-            while (index < mHeader.width)
-            {
-                if (*iter == WHITE_PIXEL_TAG)
-                {
-                    index+=4;
-                    bmpData.insert(bmpData.end(), 4, WHITE_PIXEL);
-                }
-                else if (*iter == BLACK_PIXEL_TAG)
-                {
-                    index+=4;
-                    bmpData.insert(bmpData.end(), 4, BLACK_PIXEL);
-                }
-                else if (*iter == COLOR_PIXEL_TAG) // all other colors should be tagged with it
-                {
-                    int shift = 4;
-                    if ((index + shift) > mHeader.width)
-                    {
-                        shift = mHeader.width - index;
-                    }
-                    for (int i = 0; i < shift; ++i)
-                    {
-                        iter = std::next(iter);
-                        bmpData.push_back(*iter);
-                        index+=1;
-                    }
-                }
-                else // TODO: don't need this else
-                {
-                    ++index;
-                    bmpData.push_back(*iter);
-                }
+    //    for (int row = 0; row < mEmptyRows.size(); ++row)
+    //    {
+    //        if (mEmptyRows[row] == WHITE_ROW_FLAG)
+    //        {
+    //            bmpData.insert(bmpData.end(), mHeader.width, WHITE_PIXEL);
+    //        }
+    //        else
+    //        {
+    //            int index = 0;
+    //            while (index < mHeader.width)
+    //            {
+    //                if (*iter == WHITE_PIXEL_TAG)
+    //                {
+    //                    index+=4;
+    //                    bmpData.insert(bmpData.end(), 4, WHITE_PIXEL);
+    //                }
+    //                else if (*iter == BLACK_PIXEL_TAG)
+    //                {
+    //                    index+=4;
+    //                    bmpData.insert(bmpData.end(), 4, BLACK_PIXEL);
+    //                }
+    //                else if (*iter == COLOR_PIXEL_TAG) // all other colors should be tagged with it
+    //                {
+    //                    int shift = 4;
+    //                    if ((index + shift) > mHeader.width)
+    //                    {
+    //                        shift = mHeader.width - index;
+    //                    }
+    //                    for (int i = 0; i < shift; ++i)
+    //                    {
+    //                        iter = std::next(iter);
+    //                        bmpData.push_back(*iter);
+    //                        index+=1;
+    //                    }
+    //                }
+    //                else // TODO: don't need this else
+    //                {
+    //                    ++index;
+    //                    bmpData.push_back(*iter);
+    //                }
 
-                if (iter != mData.end())
-                {
-                    iter = std::next(iter);
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-    }
+    //                if (iter != mData.end())
+    //                {
+    //                    iter = std::next(iter);
+    //                }
+    //                else
+    //                {
+    //                    break;
+    //                }
+    //            }
+    //        }
+    //    }
 
     return BmpImage(std::move(mHeader), std::move(bmpData));
 }
@@ -96,7 +97,6 @@ void BarchImage::fromBmp(const BmpImage &bmp)
     mBinaryData.clear();
     mData.clear();
     mEmptyRows.clear();
-    mEmptyRows.resize(mHeader.height); // TODO:
 
     for (int i = 0; i < mHeader.height; ++i)
     {
@@ -112,8 +112,12 @@ void BarchImage::fromBmp(const BmpImage &bmp)
         }
         if (whiteRow)
         {
-            mEmptyRows[i] = WHITE_ROW_FLAG;
+            mEmptyRows.setData(WHITE_ROW_FLAG, Compressed);
             continue;
+        }
+        else
+        {
+            mEmptyRows.setData(NOT_WHITE_ROW_FLAG, Compressed);
         }
 
         for (int j = 0; j < mHeader.width; ++j)
@@ -163,7 +167,6 @@ void BarchImage::fromBmp(const BmpImage &bmp)
 
 void BarchImage::readPixels(std::ifstream &stream)
 {
-    mEmptyRows.resize(mHeader.height);
     stream.read(reinterpret_cast<char*>(mEmptyRows.data()), mEmptyRows.size());
 
     const int beginDataPos = stream.tellg();

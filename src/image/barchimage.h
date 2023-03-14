@@ -6,12 +6,6 @@
 #include "binarydata.h"
 #include "bmpimage.h"
 
-/* TODO:
- * 1. use bitset for empty rows
- * 2. write mData pixels as bits not bytes
- *
- */
-
 class BarchImage : public BmpImage
 {
 public:
@@ -28,7 +22,7 @@ protected:
 
 private:
     BinaryData mBinaryData;
-    std::vector<uint8_t> mEmptyRows; // bitset instead of vector, serialize ulong
+    BinaryData mEmptyRows;
 };
 
 #endif // BARCHIMAGE_H

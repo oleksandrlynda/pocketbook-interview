@@ -21,7 +21,7 @@ public:
     void reset();
 
 private:
-    int mArrayIndex = 0;
+    size_t mArrayIndex = 0;
     int mBitIndex = 0;
 
     BinaryData& mData;
