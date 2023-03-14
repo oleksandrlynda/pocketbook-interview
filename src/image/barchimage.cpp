@@ -93,14 +93,29 @@ void BarchImage::fromBmp(const BmpImage &bmp)
     mHeader = bmp.header();
     const auto bmpData = bmp.data();
 
+    mBinaryData.clear();
     mData.clear();
     mEmptyRows.clear();
-    mEmptyRows.resize(mHeader.height);
+    mEmptyRows.resize(mHeader.height); // TODO:
 
-    BarchData barchData;
     for (int i = 0; i < mHeader.height; ++i)
     {
         bool whiteRow = true;
+        for (int j = 0; j < mHeader.width; ++j)
+        {
+            const auto pixel = bmpData[i * mHeader.width + j];
+            if (pixel != WHITE_PIXEL)
+            {
+                whiteRow = false;
+                break;
+            }
+        }
+        if (whiteRow)
+        {
+            mEmptyRows[i] = WHITE_ROW_FLAG;
+            continue;
+        }
+
         for (int j = 0; j < mHeader.width; ++j)
         {
             if ((j + 3) < mHeader.width)
@@ -114,58 +129,36 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                 {
                     if (firstPixel == WHITE_PIXEL)
                     {
-                        barchData.setData(WHITE_PIXEL_TAG, Tag);
+                        mBinaryData.setData(WHITE_PIXEL_TAG, Compressed);
                     }
                     else if (firstPixel == BLACK_PIXEL)
                     {
-                        whiteRow = false;
-                        barchData.setData(BLACK_PIXEL_TAG, Tag);
+                        mBinaryData.setData(BLACK_PIXEL_TAG, Compressed);
                     }
                 }
                 else
                 {
-                    whiteRow = false;
-                    barchData.setData(COLOR_PIXEL_TAG, Tag);
-                    barchData.setData(firstPixel);
-                    barchData.setData(secondPixel);
-                    barchData.setData(thirdPixel);
-                    barchData.setData(fourthPixel);
+                    mBinaryData.setData(COLOR_PIXEL_TAG, Compressed);
+                    mBinaryData.setData(firstPixel);
+                    mBinaryData.setData(secondPixel);
+                    mBinaryData.setData(thirdPixel);
+                    mBinaryData.setData(fourthPixel);
                 }
                 j+=3;
             }
             else
             {
-                barchData.setData(COLOR_PIXEL_TAG, Tag);
+                mBinaryData.setData(COLOR_PIXEL_TAG, Compressed);
                 int shift = mHeader.width - j;
                 for (int h = 0; h < shift; ++h)
                 {
                     const auto pixel = bmpData[i * mHeader.width + j + h];
-                    if (pixel != WHITE_PIXEL)
-                    {
-                        whiteRow = false;
-                    }
-                    barchData.setData(pixel);
+                    mBinaryData.setData(pixel);
                 }
                 j += shift - 1;
             }
         }
-
-        if (whiteRow)
-        {
-            mEmptyRows[i] = WHITE_ROW_FLAG;
-            barchData.vector.clear();
-        }
-        else
-        {
-            mData.insert(mData.end(), barchData.vector.begin(), barchData.vector.end());
-            barchData.vector.clear();
-        }
     }
-
-//    const auto emptyRowsCount = std::count_if(mEmptyRows.begin(), mEmptyRows.end(), [](bool value){
-//        return value;
-//    });
-//    qDebug() << "Skipped "<< emptyRowsCount << ", with size: " << emptyRowsCount * mHeader.width;
 }
 
 void BarchImage::readPixels(std::ifstream &stream)
@@ -183,50 +176,12 @@ void BarchImage::readPixels(std::ifstream &stream)
 
 bool BarchImage::writePixels(std::ofstream &stream)
 {
-//    char pad = 0xaa;
-//    stream.write(&pad, 1);
     stream.write(reinterpret_cast<char*>(mEmptyRows.data()), mEmptyRows.size());
-//    pad = 0xbb;
-//    stream.write(&pad, 1);
-    stream.write(reinterpret_cast<char*>(mData.data()), mData.size());
+    stream.write(reinterpret_cast<char*>(mBinaryData.data()), mBinaryData.size());
     return true;
 }
 
 int BarchImage::paddingSize() const
 {
     return 0;
-}
-
-void BarchData::setData(uint8_t byte, DataType type)
-{
-    // compress tag
-    int shift = 0;
-    if (type == Tag)
-    {
-        while((byte & 0b10000000) == 0)
-        {
-            if (shift == 7)
-            {
-                break;
-            }
-
-            shift++;
-            byte <<= 1;
-        }
-    }
-
-    // data push per bit
-    for (int i  = 0; i < (8 - shift); ++i, byte <<= 1)
-    {
-        vector.push_back(byte & 0b10000000);
-    }
-}
-
-void BarchData::addPadding()
-{
-    const auto padding = 8 - vector.size() % 8;
-    for (int i = 0; i < padding; ++i)
-    {
-        vector.push_back(0);
-    }
 }

@@ -20,21 +20,22 @@ void test()
     data.setData(0x01);
 
     QString str;
-    for (const auto& bit : data.vector)
+    BarchBitIterator iter(data);
+    while (true)
     {
-        str += bit ? "1" : "0";
+        str += iter.getBit() ? "1" : "0";
+        if (iter.canGoNextBit())
+        {
+            iter.nextBit();
+        }
+        else
+        {
+            break;
+        }
     }
     qDebug().noquote() << "  actual result:" << str;
-    qDebug().noquote() << "expected result:" << "0101100000001000000010000000100000001";
-
-    QString str2;
-    data.addPadding();
-    for (const auto& bit : data.vector)
-    {
-        str2 += bit ? "1" : "0";
-    }
-    qDebug().noquote() << "  actual result:" << str2;
-    qDebug().noquote() << "expected result:" << "0101100000001000000010000000100000001000";
+    qDebug().noquote() << "expected result:"
+                       << "0101100000001000000010000000100000001000";
 }
 // test end
 

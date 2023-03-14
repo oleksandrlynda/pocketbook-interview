@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "binarydata.h"
 #include "bmpimage.h"
 
 /* TODO:
@@ -10,21 +11,6 @@
  * 2. write mData pixels as bits not bytes
  *
  */
-
-enum DataType { Tag, Pixel };
-
-
-/* TODO:
- * Maybe use vector<uint_8> and add next method that will add more uint8_t if needed.
- * or next method should point on bit in the array and add more uint8_t if needed.
- */
-struct BarchData
-{
-    void setData(uint8_t byte, DataType type = Pixel);
-    void addPadding();
-
-    std::vector<bool> vector;
-};
 
 class BarchImage : public BmpImage
 {
@@ -41,7 +27,7 @@ protected:
     int paddingSize() const override;
 
 private:
-    std::vector<bool> mBinaryData;
+    BinaryData mBinaryData;
     std::vector<uint8_t> mEmptyRows; // bitset instead of vector, serialize ulong
 };
 
