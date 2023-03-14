@@ -1,6 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
 
+/* Bug with binding loop on popup.height:
+ * https://bugreports.qt.io/browse/QTBUG-81707
+ * https://bugreports.qt.io/browse/QTBUG-66826
+ */
+
 Item {
     id: rootItem
 
@@ -45,6 +50,7 @@ Item {
                     Text {
                         id: errorText
                         Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignHCenter
                         Layout.maximumWidth: popup.width - 32
                         wrapMode: Text.Wrap
                         text: rootItem.error
