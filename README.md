@@ -1,4 +1,5 @@
-![Release budge](https://img.shields.io/badge/Release-v1.0-green)
+[![Release budge](https://img.shields.io/badge/Release-v1.0-green)](https://github.com/octo-org/octo-repo/releases/latest)
+
 # pocketbook-interview
 Task for interview
 
