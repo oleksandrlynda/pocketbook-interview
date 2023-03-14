@@ -31,19 +31,19 @@ Item {
 
             Rectangle {
                 id: popup
-                width: overlay.width / 2
-                height: content.height
-                color: "#535353"
                 anchors.centerIn: parent
+
+                width: overlay.width / 2
+                height: content.height + 32
+                color: "#535353"
 
                 ColumnLayout {
                     id: content
                     anchors.centerIn: parent
-                    spacing: 0
+                    spacing: 8
 
                     Text {
                         id: errorText
-                        Layout.margins: 8
                         Layout.alignment: Qt.AlignHCenter
                         Layout.maximumWidth: popup.width - 32
                         wrapMode: Text.Wrap
@@ -53,7 +53,6 @@ Item {
 
                     Rectangle {
                         id: button
-                        Layout.margins: 8
                         Layout.alignment: Qt.AlignHCenter
                         Layout.preferredWidth: buttonText.width + 64
                         Layout.preferredHeight: buttonText.height + 8

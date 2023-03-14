@@ -3,6 +3,10 @@
 
 #include <vector>
 
+#define WHITE_PIXEL_TAG 0b0
+#define BLACK_PIXEL_TAG 0b10
+#define COLOR_PIXEL_TAG 0b11
+
 enum DataType { Compressed, Normal };
 
 class BinaryData;
@@ -32,9 +36,13 @@ class BinaryData
 public:
     BinaryData();
     void setData(uint8_t byte, DataType type = Normal);
+    uint8_t getByte(DataType type = Normal);
 
     uint8_t* data();
     const size_t size() const;
+
+    void resetIterator();
+    void resize(int size);
     void clear();
 
 private:

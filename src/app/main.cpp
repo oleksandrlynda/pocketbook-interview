@@ -7,36 +7,7 @@
 #include "controller.h"
 
 // test
-#include "barchimage.h"
-void test()
-{
-    BinaryData data;
-    data.setData(0, DataType::Compressed);
-    data.setData(2, DataType::Compressed);
-    data.setData(3, DataType::Compressed);
-    data.setData(0x01);
-    data.setData(0x01);
-    data.setData(0x01);
-    data.setData(0x01);
-
-    QString str;
-    BinaryBitIterator iter(data);
-    while (true)
-    {
-        str += iter.getBit() ? "1" : "0";
-        if (iter.canGoNextBit())
-        {
-            iter.nextBit();
-        }
-        else
-        {
-            break;
-        }
-    }
-    qDebug().noquote() << "  actual result:" << str;
-    qDebug().noquote() << "expected result:"
-                       << "0101100000001000000010000000100000001000";
-}
+#include "test.h"
 // test end
 
 QString parseImagesDir(const QGuiApplication& app)
@@ -58,7 +29,7 @@ int main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
 
-    test();
+    test::test();
 
     QQmlApplicationEngine engine;
     const QUrl url(u"qrc:/main.qml"_qs);

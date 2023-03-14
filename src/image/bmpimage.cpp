@@ -1,7 +1,7 @@
 #include "bmpimage.h"
 
 #include <fstream>
-#include <iostream>
+#include <sstream>
 
 BmpImage::BmpImage()
 {
@@ -24,8 +24,9 @@ bool BmpImage::load()
     std::ifstream stream(mPath, std::ios::binary);
     if (!stream.is_open())
     {
-        std::cout << "Stream error: " << strerror(errno) << std::endl;
-        mError = "Cannot open file.";
+        std::stringstream stream;
+        stream << strerror(errno);
+        mError = "Cannot open file. " + stream.str();
         return false;
     }
 

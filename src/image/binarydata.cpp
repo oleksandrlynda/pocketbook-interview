@@ -30,6 +30,53 @@ void BinaryData::setData(uint8_t byte, DataType type)
     }
 }
 
+uint8_t BinaryData::getByte(DataType type)
+{
+    const auto iterateToNext = [this]() {
+        if (mBitIterator.canGoNextBit())
+        {
+            mBitIterator.nextBit();
+        }
+    };
+
+    if (type == Compressed)
+    {
+        if (mBitIterator.getBit() == WHITE_PIXEL_TAG)
+        {
+            iterateToNext();
+            return WHITE_PIXEL_TAG;
+        }
+        else
+        {
+            iterateToNext();
+            if (mBitIterator.getBit())
+            {
+                iterateToNext();
+                return COLOR_PIXEL_TAG;
+            }
+            else
+            {
+                iterateToNext();
+                return BLACK_PIXEL_TAG;
+            }
+        }
+    }
+    else
+    {
+        uint8_t byte = 0;
+        for (int i = 0; i < 8; ++i)
+        {
+            if (mBitIterator.getBit())
+            {
+                const auto mask = 0b10000000 >> i;
+                byte |= mask;
+            }
+            iterateToNext();
+        }
+        return byte;
+    }
+}
+
 uint8_t* BinaryData::data()
 {
     return vector.data();
@@ -38,6 +85,16 @@ uint8_t* BinaryData::data()
 const size_t BinaryData::size() const
 {
     return vector.size();
+}
+
+void BinaryData::resetIterator()
+{
+    mBitIterator.reset();
+}
+
+void BinaryData::resize(int size)
+{
+    vector.resize(size);
 }
 
 void BinaryData::clear()

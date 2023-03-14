@@ -15,10 +15,11 @@ public:
     BmpImage toBmp();
     void fromBmp(const BmpImage& bmp);
 
+    BinaryData compressedData() const;
+
 protected:
     void readPixels(std::ifstream &stream) override;
     bool writePixels(std::ofstream &stream) override;
-    int paddingSize() const override;
 
 private:
     BinaryData mBinaryData;

@@ -3,12 +3,6 @@
 #include <algorithm>
 #include <fstream>
 
-#include <QDebug>
-
-#define WHITE_PIXEL_TAG 0b0
-#define BLACK_PIXEL_TAG 0b10
-#define COLOR_PIXEL_TAG 0b11
-
 #define WHITE_PIXEL 0xFF
 #define BLACK_PIXEL 0
 
@@ -31,60 +25,51 @@ BmpImage BarchImage::toBmp()
 {
     std::vector<uint8_t> bmpData;
     bmpData.reserve(mHeader.width * mHeader.height);
+    mBinaryData.resetIterator();
 
-    auto iter = mData.begin();
-    //    for (int row = 0; row < mEmptyRows.size(); ++row)
-    //    {
-    //        if (mEmptyRows[row] == WHITE_ROW_FLAG)
-    //        {
-    //            bmpData.insert(bmpData.end(), mHeader.width, WHITE_PIXEL);
-    //        }
-    //        else
-    //        {
-    //            int index = 0;
-    //            while (index < mHeader.width)
-    //            {
-    //                if (*iter == WHITE_PIXEL_TAG)
-    //                {
-    //                    index+=4;
-    //                    bmpData.insert(bmpData.end(), 4, WHITE_PIXEL);
-    //                }
-    //                else if (*iter == BLACK_PIXEL_TAG)
-    //                {
-    //                    index+=4;
-    //                    bmpData.insert(bmpData.end(), 4, BLACK_PIXEL);
-    //                }
-    //                else if (*iter == COLOR_PIXEL_TAG) // all other colors should be tagged with it
-    //                {
-    //                    int shift = 4;
-    //                    if ((index + shift) > mHeader.width)
-    //                    {
-    //                        shift = mHeader.width - index;
-    //                    }
-    //                    for (int i = 0; i < shift; ++i)
-    //                    {
-    //                        iter = std::next(iter);
-    //                        bmpData.push_back(*iter);
-    //                        index+=1;
-    //                    }
-    //                }
-    //                else // TODO: don't need this else
-    //                {
-    //                    ++index;
-    //                    bmpData.push_back(*iter);
-    //                }
-
-    //                if (iter != mData.end())
-    //                {
-    //                    iter = std::next(iter);
-    //                }
-    //                else
-    //                {
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //    }
+    auto rowsIter = BinaryBitIterator(mEmptyRows);
+    for (int row = 0; row < mHeader.height; ++row)
+    {
+        if (rowsIter.getBit() == WHITE_ROW_FLAG)
+        {
+            bmpData.insert(bmpData.end(), mHeader.width, WHITE_PIXEL);
+        }
+        else
+        {
+            int pixelIndex = 0;
+            while (pixelIndex < mHeader.width)
+            {
+                uint8_t byte = mBinaryData.getByte(Compressed);
+                if (byte == WHITE_PIXEL_TAG)
+                {
+                    pixelIndex += 4;
+                    bmpData.insert(bmpData.end(), 4, WHITE_PIXEL);
+                }
+                else if (byte == BLACK_PIXEL_TAG)
+                {
+                    pixelIndex += 4;
+                    bmpData.insert(bmpData.end(), 4, BLACK_PIXEL);
+                }
+                else if (byte == COLOR_PIXEL_TAG)
+                {
+                    int shift = 4;
+                    if ((pixelIndex + shift) > mHeader.width)
+                    {
+                        shift = mHeader.width - pixelIndex;
+                    }
+                    for (int i = 0; i < shift; ++i)
+                    {
+                        bmpData.push_back(mBinaryData.getByte());
+                        pixelIndex += 1;
+                    }
+                }
+            }
+        }
+        if (rowsIter.canGoNextBit())
+        {
+            rowsIter.nextBit();
+        }
+    }
 
     return BmpImage(std::move(mHeader), std::move(bmpData));
 }
@@ -139,6 +124,14 @@ void BarchImage::fromBmp(const BmpImage &bmp)
                     {
                         mBinaryData.setData(BLACK_PIXEL_TAG, Compressed);
                     }
+                    else
+                    {
+                        mBinaryData.setData(COLOR_PIXEL_TAG, Compressed);
+                        mBinaryData.setData(firstPixel);
+                        mBinaryData.setData(secondPixel);
+                        mBinaryData.setData(thirdPixel);
+                        mBinaryData.setData(fourthPixel);
+                    }
                 }
                 else
                 {
@@ -165,16 +158,22 @@ void BarchImage::fromBmp(const BmpImage &bmp)
     }
 }
 
+BinaryData BarchImage::compressedData() const
+{
+    return mBinaryData;
+}
+
 void BarchImage::readPixels(std::ifstream &stream)
 {
+    mEmptyRows.resize((mHeader.height + 7) / 8);
     stream.read(reinterpret_cast<char*>(mEmptyRows.data()), mEmptyRows.size());
 
     const int beginDataPos = stream.tellg();
     stream.seekg(0, stream.end);
     const int endDataPos = stream.tellg();
     stream.seekg(beginDataPos);
-    mData.resize(endDataPos - beginDataPos);
-    stream.read(reinterpret_cast<char*>(mData.data()), mData.size());
+    mBinaryData.resize(endDataPos - beginDataPos);
+    stream.read(reinterpret_cast<char*>(mBinaryData.data()), mBinaryData.size());
 }
 
 bool BarchImage::writePixels(std::ofstream &stream)
@@ -182,9 +181,4 @@ bool BarchImage::writePixels(std::ofstream &stream)
     stream.write(reinterpret_cast<char*>(mEmptyRows.data()), mEmptyRows.size());
     stream.write(reinterpret_cast<char*>(mBinaryData.data()), mBinaryData.size());
     return true;
-}
-
-int BarchImage::paddingSize() const
-{
-    return 0;
 }
