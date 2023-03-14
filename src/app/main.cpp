@@ -6,10 +6,6 @@
 
 #include "controller.h"
 
-// test
-#include "test.h"
-// test end
-
 QString parseImagesDir(const QGuiApplication& app)
 {
     QCommandLineParser parser;
@@ -28,8 +24,6 @@ QString parseImagesDir(const QGuiApplication& app)
 int main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
-
-    test::test();
 
     QQmlApplicationEngine engine;
     const QUrl url(u"qrc:/main.qml"_qs);
