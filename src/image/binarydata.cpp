@@ -6,7 +6,7 @@ BinaryData::BinaryData()
 
 void BinaryData::setData(uint8_t byte, DataType type)
 {
-    // compress tag
+    // compress
     int shift = 0;
     if (type == Compressed)
     {
@@ -39,6 +39,7 @@ uint8_t BinaryData::getByte(DataType type)
         }
     };
 
+    // TODO: remove TAGS relation from this class
     if (type == Compressed)
     {
         if (mBitIterator.getBit() == WHITE_PIXEL_TAG)
